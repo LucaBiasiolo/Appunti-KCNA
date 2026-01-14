@@ -1,9 +1,12 @@
 # 02. Architettura Cloud Native
 ## Fondamenti dell'Architettura Cloud Native
 La CNCF definisce il termine ***cloud native*** come segue:
+
 "*Le tecnologie Cloud native consentono alle organizzazioni di creare ed eseguire applicazioni scalabili in ambienti moderni e dinamici come cloud pubblici, privati e ibridi. Container, service mesh, microservizi, infrastruttura immutabile e API dichiarative esemplificano questo approccio.*
 *Queste tecniche abilitano sistemi debolmente accoppiati che sono resilienti, gestibili e osservabili. Combinati con una robusta automazione, consentono agli ingegneri di apportare cambiamenti ad alto impatto frequentemente e in modo prevedibile con il minimo sforzo.* *[…]*"
-**Architettura Monolitica vs Microservizi**
+
+## Architettura Monolitica vs Microservizi
+
 Architettura Monolitica: un'applicazione di solito ha una singola base di codice e viene fornita come un singolo file binario che può essere eseguito su un server
 - tutte le funzionalità sono nella stessa applicazione
 - facile da sviluppare e distribuire
