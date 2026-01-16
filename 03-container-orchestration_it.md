@@ -41,8 +41,7 @@ Le ***4C della sicurezza Cloud Native*** possono dare un'idea approssimativa di 
 - **Codice** (Code)
 - **Container**
 - **Cluster**
-- **Cloud **(/Co-Lo/Corporate Datacenter)
-
+- **Cloud** (/Co-Lo/Corporate Datacenter)
 
 ## Fondamenti dell'Orchestrazione dei Container
 Avere molti piccoli container debolmente accoppiati, isolati e indipendenti è la base per le cosiddette architetture a microservizi.
@@ -62,7 +61,7 @@ I namespace di rete consentono a ogni container di avere il proprio indirizzo IP
 Per rendere l'applicazione accessibile dall'esterno del sistema host, i container hanno la possibilità di mappare una porta dal container a una porta dal sistema host.
 Per consentire la comunicazione tra container attraverso gli host, possiamo usare una rete overlay che li inserisce in una rete virtuale estesa attraverso i sistemi host.
 La maggior parte delle implementazioni moderne del networking dei container si basa sulla Container Network Interface (CNI).
-![image](..\files\image_g.png)
+![image](files\image_g.png)
 
 ## Service Discovery & DNS
 Nelle piattaforme di orchestrazione dei container le cose sono molto più complicate rispetto ai datacenter tradizionali:
@@ -76,13 +75,14 @@ Approcci alla Service Discovery:
 - **DNS** I moderni server DNS che dispongono di un'API di servizio possono essere utilizzati per registrare nuovi servizi man mano che vengono creati
 - **Key-Value-Store** Utilizzo di un datastore fortemente coerente specialmente per memorizzare informazioni sui servizi (**etcd**, **Consul**, **Apache Zookeeper**)
 
+// SEGNALIBRO
 
 ## Service Mesh
 Il monitoraggio, il controllo degli accessi o la crittografia del traffico di rete sono desiderabili quando i container comunicano tra loro.
 Invece di implementare tutta questa funzionalità nella tua applicazione, puoi semplicemente avviare un secondo container che ha questa funzionalità implementata.
 Il software che puoi usare per gestire il traffico di rete è chiamato **proxy**. Si tratta di un'applicazione server che si trova tra un client e un server e può modificare o filtrare il traffico di rete prima che raggiunga il server. Rappresentanti popolari sono [nginx](https://www.nginx.com/), [haproxy](http://www.haproxy.org/) o [envoy](https://www.envoyproxy.io/).
 ***Una service mesh aggiunge un server proxy a ogni container che hai nella tua architettura.***
-![image](..files\image_s.png)
+![image](files\image_s.png)
 Quando viene utilizzata una service mesh, le applicazioni non parlano tra loro direttamente, ma il traffico viene instradato attraverso i proxy. Le service mesh più popolari al momento sono [istio](https://istio.io/) e [linkerd](https://linkerd.io/).
 I proxy in una service mesh formano il ***data plane***. Qui è dove le regole di rete sono implementate e modellano il flusso del traffico.
 Queste regole sono gestite centralmente nel ***control plane*** della service mesh. Qui è dove definisci come fluisce il traffico dal servizio A al servizio B e quale configurazione dovrebbe essere applicata ai proxy.
@@ -93,9 +93,10 @@ La configurazione viene quindi caricata sul control plane e distribuita al data 
 Dal punto di vista dello storage, i container hanno un difetto significativo: sono effimeri.
 Le immagini dei container sono in sola lettura e consistono in diversi strati che includono tutto ciò che hai aggiunto durante la fase di build. Ciò garantisce che ogni volta che avvii un container da un'immagine ottieni lo stesso comportamento e funzionalità.
 Per consentire la scrittura di file, **uno strato di lettura-scrittura viene posto sopra l'immagine del container** quando si avvia un container da un'immagine.
-![image](..files\image_8.png)
+![image](files\image_8.png)
+
 Il problema qui è che **questo strato di lettura-scrittura viene perso quando il container viene fermato o eliminato**.
 Se un container deve persistere i dati su un host, un ***volume*** può essere utilizzato per ottenere ciò: invece di isolare l'intero filesystem di un processo, le directory che risiedono sull'host vengono passate nel filesystem del container, ***questo indebolisce l'isolamento del container, dando accesso al filesystem dell'host***.
 Spesso, i dati devono essere accessibili da più container che vengono avviati su diversi sistemi host o quando un container viene avviato su un host diverso dovrebbe comunque avere accesso al suo volume.
 I sistemi di orchestrazione dei container come Kubernetes possono aiutare a mitigare questi problemi, ma richiedono sempre un sistema di storage robusto collegato ai server host.
-![image](..files\image_o.png)
+![image](files\image_o.png)

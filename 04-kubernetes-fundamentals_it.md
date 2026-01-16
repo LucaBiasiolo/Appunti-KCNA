@@ -1,14 +1,14 @@
-# 04. Fondamenti di Kubernetes (Kubernetes Fundamentals)
-## Architettura di Kubernetes (Kubernetes Architecture)
-I Cluster Kubernetes sono composti da due diversi tipi di server Node che costituiscono un Cluster:
+# 04. Fondamenti di Kubernetes
+## Architettura di Kubernetes
+I Cluster Kubernetes sono composti da due diversi tipi di server Node:
 - **Control plane node(s)**
-Questi sono il cervello dell'operazione. I Control plane node contengono vari componenti che gestiscono il Cluster e controllano vari compiti come deployment, scheduling e self-healing dei carichi di lavoro containerizzati.
+Questi sono il cervello del cluster. I Control plane node contengono vari componenti che gestiscono il Cluster e controllano vari compiti come deployment, scheduling e self-healing dei carichi di lavoro containerizzati.
 - **Worker nodes**
 I Worker node sono il luogo in cui le applicazioni vengono eseguite nel Cluster. Questo è l'unico compito dei Worker node e non hanno ulteriori logiche implementate. Il loro comportamento, come ad esempio se debbano avviare un container, è completamente controllato dal Control plane node.
 
 I Control plane node tipicamente ospitano i seguenti servizi:
 - **kube-apiserver** tutti gli altri componenti interagiscono con l'api-server e qui è dove gli utenti accedono al Cluster
-- **etcd** un database che contiene lo stato del Cluster
+- **etcd** un database chiave-valore che contiene lo stato del Cluster
 - **kube-scheduler** quando deve essere schedulato un nuovo carico di lavoro, il kube-scheduler sceglie un Worker node adatto, basandosi su diverse proprietà come CPU e memoria
 - **kube-controller-manager** contiene diversi cicli di controllo non terminanti che gestiscono lo stato del Cluster
 - **cloud-controller-manager** (opzionale) può essere utilizzato per interagire con le API dei fornitori di cloud, per creare risorse esterne come load balancer, storage o gruppi di sicurezza
@@ -20,7 +20,7 @@ Componenti dei Worker node:
 
 ***È importante notare che questo design rende possibile che le applicazioni già avviate su un Worker node continuino a girare anche se il control plane non è disponibile. Anche se molte funzionalità importanti come la scalabilità, lo scheduling di nuove applicazioni, ecc., non saranno possibili mentre il control plane è offline.***
 Kubernetes ha anche il concetto di *namespaces*, da non confondere con i namespace del kernel che vengono utilizzati per isolare i container. **Un Namespace di Kubernetes può essere utilizzato per dividere un Cluster in *molteplici cluster virtuali***, che possono essere utilizzati per la multi-tenancy quando più team condividono un Cluster.
-![image](..files\image.png)
+![image](files\image.png)
 
 ## Configurazione di Kubernetes (Kubernetes Setup)
 Creare un "cluster" di test può essere molto semplice con:
@@ -51,17 +51,17 @@ Senza di essa, la comunicazione con il Cluster non è possibile, ogni utente e o
 **L'API di Kubernetes è implementata come un'interfaccia RESTful esposta su HTTPS.**
 Prima che una richiesta venga elaborata da Kubernetes, deve passare attraverso tre fasi:
 - **Autenticazione (Authentication)**
-Il richiedente deve presentare un mezzo di identità per autenticarsi contro l'API. Comunemente fatto con un certificato firmato digitalmente ([X.509](https://en.wikipedia.org/wiki/X.509)) o con un sistema di gestione dell'identità esterno. Gli utenti di Kubernetes sono *sempre* gestiti esternamente. I [Service Accounts](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) possono essere utilizzati per autenticare utenti tecnici.
+Il richiedente deve presentare un mezzo di identità per autenticarsi contro l'API. Comunemente fatto con un certificato firmato digitalmente ([X.509](https://en.wikipedia.org/wiki/X.509)) o con un sistema di gestione dell'identità esterno. Gli utenti di Kubernetes sono *sempre* gestiti esternamente. I [Service Accounts](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) possono essere utilizzati per autenticare utenti tecnici (applicazioni esterne che si connettono al cluster).
 - **Autorizzazione (Authorization)**
 Viene deciso cosa il richiedente è autorizzato a fare. In Kubernetes questo può essere fatto con il [Role Based Access Control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 - **Admission Control**
 Nell'ultimo passaggio, gli [admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) possono essere utilizzati per modificare o convalidare la richiesta. Ad esempio, se un utente tenta di utilizzare un'immagine di container da un registro inaffidabile, un admission controller potrebbe bloccare questa richiesta. Strumenti come l'[Open Policy Agent](https://www.openpolicyagent.org/) possono essere utilizzati per gestire l'admission control esternamente.
-![image](..files\image_3.png)
+![image](files\image_3.png)
 
 
 ## Esecuzione di Container su Kubernetes
 In Kubernetes, invece di avviare direttamente i container, si **definiscono i Pod come la più piccola unità di calcolo** e Kubernetes la traduce in un container in esecuzione.
-![image](..files\image_a.png)
+![image](files\image_a.png)
 Container Runtime:
 - **containerd** è un'implementazione leggera e performante per eseguire container
 - **CRI-O** è stato creato da Red Hat

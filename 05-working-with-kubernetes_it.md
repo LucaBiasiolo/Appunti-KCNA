@@ -118,10 +118,135 @@ Il tipo di autenticazione utilizzato è definito nelle opzioni di avvio di kube-
 --authorization-webhook-config-file
 ```
 ### 2. Autorizzazione (Authorization - RBAC)
-RBAC sta per Role Based Access Control. Tutte le risorse sono oggetti API modellati in Kubernetes, dai Pod ai Namespace. Appartengono anche a Gruppi API come **core** e **apps**. Queste risorse consentono operazioni come Create, Read, Update e Delete (CRUD), con cui abbiamo lavorato finora.
-Nei file YAML, le operazioni sono indicate come verbi.
-Le regole (Rules) sono operazioni che possono agire su un gruppo API.
-I Roles sono un gruppo di regole che influenzano, o hanno come ambito (scope), un singolo Namespace, mentre i ClusterRoles hanno come ambito l'intero Cluster.
-Ogni operazione può agire su uno dei tre soggetti: User Accounts, che non esistono come oggetti API; Service Accounts e Gruppi, che sono noti come clusterrolebinding quando si usa **kubectl**.
+**RBAC (Role-Based Access Control)** è il meccanismo di autorizzazione predefinito in Kubernetes che controlla chi può eseguire quali operazioni su quali risorse. RBAC si basa su un sistema di ruoli e permessi che permette di definire regole di accesso granulari e sicure.
+
+#### Concetti fondamentali di RBAC
+
+**Verbi (Operazioni)**
+Le operazioni che possono essere eseguite sulle risorse Kubernetes sono definite come verbi:
+- **create**: creare nuove risorse
+- **read** (o **get**): leggere una singola risorsa
+- **list**: elencare più risorse
+- **watch**: osservare cambiamenti in tempo reale
+- **update**: aggiornare una risorsa esistente
+- **patch**: applicare modifiche parziali a una risorsa
+- **delete**: eliminare una risorsa
+- **deletecollection**: eliminare un'intera collezione di risorse
+
+**Gruppi API**
+Le risorse Kubernetes sono organizzate in gruppi API. Ogni gruppo contiene un insieme di risorse correlate:
+- **core** (o **""**): risorse fondamentali come Pod, Service, ConfigMap, Secret, Namespace, Node
+- **apps**: risorse per applicazioni come Deployment, StatefulSet, DaemonSet, ReplicaSet
+- **batch**: risorse per job e cronjob
+- **networking.k8s.io**: risorse di networking come Ingress, NetworkPolicy
+- **storage.k8s.io**: risorse di storage come StorageClass, VolumeAttachment
+- E molti altri...
+
+#### Oggetti Kubernetes per RBAC
+
+**1. Role**
+Un **Role** definisce un insieme di permessi (regole) all'interno di un **singolo namespace**. Ogni regola specifica:
+- Il gruppo API su cui agisce
+- Le risorse all'interno di quel gruppo
+- I verbi (operazioni) consentiti
+
+**2. ClusterRole**
+Un **ClusterRole** è simile a un Role, ma i suoi permessi si applicano a **tutto il cluster**. È utile per:
+- Risorse a livello di cluster (Node, Namespace, PersistentVolume)
+- Permessi che devono essere applicati in tutti i namespace
+- Risorse che non appartengono a nessun namespace
+
+**3. RoleBinding**
+Un **RoleBinding** associa un Role a uno o più **soggetti** (utenti, gruppi o ServiceAccount) all'interno di un namespace specifico. È il meccanismo che "lega" i permessi definiti in un Role agli identificativi che li utilizzano.
+
+**4. ClusterRoleBinding**
+Un **ClusterRoleBinding** associa un ClusterRole a soggetti a **livello di cluster**. Questo permette di assegnare permessi cluster-wide a utenti, gruppi o ServiceAccount.
+
+**5. ServiceAccount**
+Un **ServiceAccount** rappresenta un'identità per processi che eseguono all'interno di un Pod. È l'unico tipo di "utente" che può essere creato direttamente come oggetto Kubernetes. I ServiceAccount sono utilizzati per:
+- Autenticare processi interni al cluster (es. applicazioni che interagiscono con l'API server)
+- Assegnare permessi specifici a Pod tramite RBAC
+- Isolare le identità per diverse applicazioni
+
+#### Soggetti in RBAC
+
+I permessi possono essere assegnati a tre tipi di soggetti:
+- **User Accounts**: identità utente umane. Non sono oggetti Kubernetes nativi, ma vengono gestiti esternamente (es. tramite certificati, token, provider di identità)
+- **Service Accounts**: identità per processi interni al cluster, create come oggetti Kubernetes
+- **Groups**: collezioni di utenti o ServiceAccount, utili per assegnare permessi a intere team
+
+#### Flusso di autorizzazione
+
+Quando un client (es. kubectl) tenta di eseguire un'operazione:
+1. **Autenticazione**: verifica l'identità del client
+2. **Autorizzazione RBAC**: il sistema controlla se esiste un RoleBinding/ClusterRoleBinding che assegna i permessi necessari al soggetto
+3. **Admission Controllers**: controlli aggiuntivi possono modificare o negare la richiesta
+
+#### Best practices
+
+- **Principio del minimo privilegio**: assegnare solo i permessi strettamente necessari
+- **Usare Role per namespace**: preferire Role a ClusterRole quando possibile
+- **Separare i ruoli**: creare Role specifici per funzioni diverse (es. "reader", "developer", "admin")
+- **Documentare i permessi**: mantenere una documentazione chiara dei ruoli e dei loro scopi
+- **Audit regolare**: controllare periodicamente i permessi assegnati
+
+RBAC è fondamentale per la sicurezza in Kubernetes, permettendo di controllare in modo granulare chi può fare cosa nel cluster.
 ### 3. Admission Controllers
-Gli Admission controller sono pezzi di software che possono accedere al contenuto degli oggetti creati dalle richieste. Possono modificare il contenuto o convalidarlo, e potenzialmente negare la richiesta.
+Gli Admission controller sono pezzi di software che possono accedere al contenuto degli oggetti creati dalle richieste. Possono modificare il contenuto o convalidarlo, e potenzialmente negare la richiesta. Kubernetes fornisce diversi admission controller predefiniti che possono essere abilitati o disabilitati tramite il flag `--enable-admission-plugins` di kube-apiserver.
+
+#### Admission Controller Predefiniti
+
+**1. PodSecurity (ex PodSecurityPolicy)**
+Controlla le policy di sicurezza dei Pod per garantire che rispettino le best practices di sicurezza. Può limitare:
+- L'uso di privilegi (privileged containers)
+- L'accesso al filesystem root
+- La condivisione di namespace tra container
+- L'uso di volumi specifici
+
+**2. ResourceQuota**
+Applica limiti di risorse a livello di namespace. Impedisce la creazione di risorse che superano i limiti definiti.
+
+**3. LimitRanger**
+Applica limiti di risorse a singoli Pod/Container. Se un Pod non specifica limiti, LimitRanger può applicare valori di default.
+
+**4. DefaultStorageClass**
+Assegna automaticamente una StorageClass di default ai PersistentVolumeClaims che non ne specificano una. Utile per semplificare la gestione dello storage.
+
+**5. DefaultTolerationSeconds**
+Aggiunge automaticamente tolerations di default ai Pod che non ne specificano, utile per gestire nodi con taint temporanei.
+
+**6. NodeRestriction**
+Limita i permessi dei nodi (kubelet) per accedere solo alle risorse che appartengono al nodo stesso. Previene che un nodo compromesso possa accedere a risorse di altri nodi.
+
+**7. ServiceAccount**
+Gestisce l'automounting dei ServiceAccount nei Pod. Permette di controllare se i Pod ricevono automaticamente un ServiceAccount e il token associato.
+
+**8. MutatingAdmissionWebhook e ValidatingAdmissionWebhook**
+Questi admission controller permettono di estendere Kubernetes con webhook personalizzati:
+- **MutatingAdmissionWebhook**: può modificare le richieste prima che vengano validate (es. aggiungere label, modificare spec)
+- **ValidatingAdmissionWebhook**: valida le richieste e può rifiutarle se non soddisfano criteri specifici
+
+#### Configurazione degli Admission Controller
+
+Gli admission controller possono essere abilitati/disabilitati avviando kube-apiserver con i flag appropriati:
+
+```bash
+kube-apiserver \
+  --enable-admission-plugins=PodSecurity,ResourceQuota,LimitRanger \
+  --disable-admission-plugins=DefaultStorageClass
+```
+
+Per verificare quali admission controller sono attivi:
+```bash
+kubectl describe --raw /healthz/ready
+```
+
+#### Best Practices per gli Admission Controller
+
+- **Abilita sempre**: PodSecurity, ResourceQuota, LimitRanger, NodeRestriction
+- **Usa webhook personalizzati**: per policy specifiche dell'organizzazione
+- **Testa in staging**: prima di applicare admission controller in produzione
+- **Monitora i rifiuti**: logga le richieste rifiutate per debug
+- **Documenta le policy**: mantieni una documentazione chiara delle regole applicate
+
+Gli admission controller sono fondamentali per la sicurezza e la governance in Kubernetes, permettendo di applicare policy centralizzate e prevenire configurazioni errate o pericolose.

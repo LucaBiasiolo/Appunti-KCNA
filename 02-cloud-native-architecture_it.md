@@ -7,7 +7,7 @@ La CNCF definisce il termine ***cloud native*** come segue:
 
 ## Architettura Monolitica vs Microservizi
 
-Architettura Monolitica: un'applicazione di solito ha una singola base di codice e viene fornita come un singolo file binario che può essere eseguito su un server
+Architettura Monolitica: un'applicazione di solito ha una singola base di codice e viene fornita e dispiegata come un singolo file binario che può essere eseguito su un server
 - tutte le funzionalità sono nella stessa applicazione
 - facile da sviluppare e distribuire
 - molto difficile da gestire la complessità, scalare tra più team, implementare cambiamenti velocemente o scalare in modo efficiente
@@ -37,7 +37,7 @@ Le caratteristiche dell'Architettura Cloud Native sono:
 
 ## Autoscaling
 Il pattern di autoscaling descrive la regolazione dinamica delle risorse in base alla domanda corrente. CPU e memoria sono le metriche ovvie su cui decidere quando scalare le applicazioni all'aumentare o al diminuire del carico, ma possono essere considerati anche altri metodi basati sul tempo o su metriche aziendali per scalare i propri servizi verso l'alto o verso il basso.
-- **Vertical Scaling** descrive il cambiamento nelle dimensioni dell'hardware sottostante, che funziona solo entro certi limiti hardware per il bare metal, ma anche per le macchine virtuali
+- **Vertical Scaling** descrive il cambiamento nelle dimensioni dell'hardware sottostante (modifica di CPU e RAM), che funziona solo entro certi limiti hardware per il bare metal, ma anche per le macchine virtuali
 - **Horizontal Scaling** descrive il processo di generazione di nuove risorse di elaborazione che possono essere nuove copie del processo applicativo, macchine virtuali o - in modo meno immediato - persino nuovi rack di server e altro hardware
 
 ***Parlando di Autoscaling parliamo di Horizontal Scaling.***
@@ -66,7 +66,7 @@ Altri standard importanti sono:
 I lavori nel cloud computing sono più difficili da descrivere e le transizioni sono più fluide, poiché le responsabilità sono spesso condivise tra più persone provenienti da aree diverse e con competenze diverse
 Ruoli Cloud Native:
 - **Cloud Architect** responsabile dell'adozione delle tecnologie cloud, della progettazione del panorama applicativo e dell'infrastruttura, con focus su sicurezza, scalabilità e meccanismi di distribuzione
-- **DevOps Engineer** utilizza strumenti e processi che bilanciano lo sviluppo software e le operazioni
+- **DevOps Engineer** utilizza strumenti e processi che bilanciano lo sviluppo software e le operazioni "post-commit", ovvero pipeline CI/CD, rilasci, infrastrutture ecc.
 - **Security Engineer**
 - **DevSecOps Engineer** combina i due ruoli precedenti, spesso usato per costruire ponti tra i team di sviluppo e sicurezza più tradizionali
 - **Data Engineer** raccoglie, archivia e analizza le vaste quantità di dati che vengono o possono essere raccolti in grandi sistemi
